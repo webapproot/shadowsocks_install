@@ -14,7 +14,7 @@
 # Author: Teddysun <i@teddysun.com>
 
 name=ShadowsocksR
-BIN=/usr/local/shadowsocks/server.py
+BIN=/usr/local/shadowsocks/shadowsocks/server.py
 conf=/etc/shadowsocks.json
 
 start(){
