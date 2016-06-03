@@ -4,19 +4,15 @@ export PATH
 #=================================================================#
 #   System Required:  CentOS 6,7, Debian, Ubuntu                  #
 #   Description: One click Install ShadowsocksR Server            #
-#   Author: Teddysun <i@teddysun.com>                             #
+#   Author: 91yun <https://twitter.com/91yun>                     #
 #   Thanks: @breakwa11 <https://twitter.com/breakwa11>            #
+#   Thanks: @Teddysun <i@teddysun.com>                            #
 #   Intro:  https://shadowsocks.be/9.html                         #
 #=================================================================#
 
 clear
 echo
-echo "#############################################################"
-echo "# One click Install ShadowsocksR Server                     #"
-echo "# Intro: https://shadowsocks.be/9.html                      #"
-echo "# Author: Teddysun <i@teddysun.com>                         #"
-echo "# Thanks: @breakwa11 <https://twitter.com/breakwa11>        #"
-echo "#############################################################"
+
 echo
 
 #Current folder
@@ -87,8 +83,8 @@ function pre_install(){
     fi
     # Set ShadowsocksR config password
     echo "Please input password for ShadowsocksR:"
-    read -p "(Default password: teddysun.com):" shadowsockspwd
-    [ -z "$shadowsockspwd" ] && shadowsockspwd="teddysun.com"
+    read -p "(Default password: www.91yun.org):" shadowsockspwd
+    [ -z "$shadowsockspwd" ] && shadowsockspwd="www.91yun.org"
     echo
     echo "---------------------------"
     echo "password = $shadowsockspwd"
@@ -130,11 +126,11 @@ function pre_install(){
     char=`get_char`
     # Install necessary dependencies
     if [ "$OS" == 'CentOS' ]; then
-        yum install -y wget unzip openssl-devel gcc swig python python-devel python-setuptools autoconf libtool libevent
+        yum install -y wget unzip openssl-devel gcc swig python python-devel python-setuptools autoconf libtool libevent git ntpdate
         yum install -y m2crypto automake make curl curl-devel zlib-devel perl perl-devel cpio expat-devel gettext-devel
     else
         apt-get -y update
-        apt-get -y install python python-dev python-pip python-m2crypto curl wget unzip gcc swig automake make perl cpio build-essential
+        apt-get -y install python python-dev python-pip python-m2crypto curl wget unzip gcc swig automake make perl cpio build-essential git ntpdate
     fi
     cd $cur_dir
 }
@@ -147,18 +143,18 @@ function download_files(){
         exit 1
     fi
     # Download ShadowsocksR file
-    if ! wget --no-check-certificate -O manyuser.zip https://github.com/breakwa11/shadowsocks/archive/manyuser.zip; then
-        echo "Failed to download ShadowsocksR file!"
-        exit 1
-    fi
+    # if ! wget --no-check-certificate -O manyuser.zip https://github.com/breakwa11/shadowsocks/archive/manyuser.zip; then
+        # echo "Failed to download ShadowsocksR file!"
+        # exit 1
+    # fi
     # Download ShadowsocksR chkconfig file
     if [ "$OS" == 'CentOS' ]; then
-        if ! wget --no-check-certificate https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocksR -O /etc/init.d/shadowsocks; then
+        if ! wget --no-check-certificate https://raw.githubusercontent.com/91yun/shadowsocks_install/master/shadowsocksR -O /etc/init.d/shadowsocks; then
             echo "Failed to download ShadowsocksR chkconfig file!"
             exit 1
         fi
     else
-        if ! wget --no-check-certificate https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocksR-debian -O /etc/init.d/shadowsocks; then
+        if ! wget --no-check-certificate https://raw.githubusercontent.com/91yun/shadowsocks_install/master/shadowsocksR-debian -O /etc/init.d/shadowsocks; then
             echo "Failed to download ShadowsocksR chkconfig file!"
             exit 1
         fi
@@ -208,22 +204,25 @@ function firewall_set(){
 function config_shadowsocks(){
     cat > /etc/shadowsocks.json<<-EOF
 {
-    "server":"0.0.0.0",
-    "server_ipv6":"::",
-    "server_port":${shadowsocksport},
-    "local_address":"127.0.0.1",
-    "local_port":1080,
-    "password":"${shadowsockspwd}",
-    "timeout":120,
-    "method":"aes-256-cfb",
-    "protocol":"origin",
-    "protocol_param":"",
-    "obfs":"plain",
-    "obfs_param":"",
-    "redirect":"",
-    "dns_ipv6":false,
-    "fast_open":false,
-    "workers":1
+    "server": "0.0.0.0",
+    "server_ipv6": "::",
+    "server_port": ${shadowsocksport},
+    "local_address": "127.0.0.1",
+    "local_port": 1081,
+    "password": "${shadowsockspwd}",
+    "timeout": 120,
+    "udp_timeout": 60,
+    "method": "chacha20",
+    "protocol": "auth_sha1_compatible",
+    "protocol_param": "",
+    "obfs": "http_simple_compatible",
+    "obfs_param": "",
+    "dns_ipv6": false,
+    "connect_verbose_info": 0,
+    "redirect": "",
+    "fast_open": false,
+    "workers": 1
+
 }
 EOF
 }
@@ -238,8 +237,9 @@ function install_ss(){
     ldconfig
     # Install ShadowsocksR
     cd $cur_dir
-    unzip -q manyuser.zip
-    mv shadowsocks-manyuser/shadowsocks /usr/local/
+    # unzip -q manyuser.zip
+    # mv shadowsocks-manyuser/shadowsocks /usr/local/
+	git clone -b manyuser https://github.com/breakwa11/shadowsocks.git /usr/local/
     if [ -f /usr/local/shadowsocks/server.py ]; then
         chmod +x /etc/init.d/shadowsocks
         # Add run on system start up
@@ -259,9 +259,9 @@ function install_ss(){
         echo -e "Password: \033[41;37m ${shadowsockspwd} \033[0m"
         echo -e "Local IP: \033[41;37m 127.0.0.1 \033[0m"
         echo -e "Local Port: \033[41;37m 1080 \033[0m"
-        echo -e "Protocol: \033[41;37m origin \033[0m"
-        echo -e "obfs: \033[41;37m plain \033[0m"
-        echo -e "Encryption Method: \033[41;37m aes-256-cfb \033[0m"
+        echo -e "Protocol: \033[41;37m auth_sha1 \033[0m"
+        echo -e "obfs: \033[41;37m http_simple \033[0m"
+        echo -e "Encryption Method: \033[41;37m chacha20 \033[0m"
         echo
         echo "Welcome to visit:https://shadowsocks.be/9.html"
         echo "If you want to change protocol & obfs, reference URL:"
@@ -270,10 +270,17 @@ function install_ss(){
         echo "Enjoy it!"
         echo
     else
-        echo "Shadowsocks install failed! Please Email to Teddysun <i@teddysun.com> and contact."
+        echo "Shadowsocks install failed!"
         install_cleanup
         exit 1
     fi
+}
+
+#改成北京时间
+function check_datetime(){
+rm -rf /etc/localtime
+ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+ntpdate time.nist.gov
 }
 
 # Install cleanup
@@ -314,6 +321,7 @@ function uninstall_shadowsocks(){
     fi
 }
 
+
 # Install ShadowsocksR
 function install_shadowsocks(){
     checkos
@@ -327,6 +335,7 @@ function install_shadowsocks(){
         firewall_set
     fi
     install_cleanup
+	check_datetime
 }
 
 # Initialization step
