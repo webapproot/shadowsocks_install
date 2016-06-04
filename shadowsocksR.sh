@@ -278,9 +278,9 @@ function install_ss(){
 
 #改成北京时间
 function check_datetime(){
-rm -rf /etc/localtime
-ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-ntpdate time.nist.gov
+	rm -rf /etc/localtime
+	ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+	ntpdate 1.cn.pool.ntp.org
 }
 
 # Install cleanup
@@ -332,10 +332,11 @@ function install_shadowsocks(){
     config_shadowsocks
     install_ss
     if [ "$OS" == 'CentOS' ]; then
-        firewall_set
+        firewall_set > /dev/null 2>&1
     fi
-    install_cleanup
 	check_datetime
+    install_cleanup
+	
 }
 
 # Initialization step
