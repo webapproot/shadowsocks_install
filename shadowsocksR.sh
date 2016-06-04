@@ -186,15 +186,20 @@ function firewall_set(){
             firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/udp
             firewall-cmd --reload
         else
-            echo "Firewalld looks like not running, try to start..."
-            systemctl start firewalld
-            if [ $? -eq 0 ];then
-                firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/tcp
-                firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/udp
-                firewall-cmd --reload
-            else
-                echo "WARNING: Try to start firewalld failed. please enable port ${shadowsocksport} manually if necessary."
-            fi
+			/etc/init.d/iptables status > /dev/null 2>&1
+			if [ $? -eq 0 ]; then
+				iptables -L -n | grep '${shadowsocksport}' | grep 'ACCEPT' > /dev/null 2>&1
+				if [ $? -ne 0 ]; then
+					iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${shadowsocksport} -j ACCEPT
+					iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${shadowsocksport} -j ACCEPT
+					/etc/init.d/iptables save
+					/etc/init.d/iptables restart
+				else
+					echo "port ${shadowsocksport} has been set up."
+				fi
+			else
+				echo "WARNING: firewall like shutdown or not installed, please manually set it if necessary."
+			fi		
         fi
     fi
     echo "firewall set completed..."
