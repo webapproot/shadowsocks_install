@@ -7,7 +7,7 @@ export PATH
 #   Author: 91yun <https://twitter.com/91yun>                     #
 #   Thanks: @breakwa11 <https://twitter.com/breakwa11>            #
 #   Thanks: @Teddysun <i@teddysun.com>                            #
-#   Intro:  https://shadowsocks.be/9.html                         #
+#   Intro:  https://www.91yun.org/archives/2079                   #
 #=================================================================#
 
 clear
@@ -218,12 +218,12 @@ function config_shadowsocks(){
     "timeout": 120,
     "udp_timeout": 60,
     "method": "chacha20",
-    "protocol": "auth_sha1_compatible",
+    "protocol": "auth_sha1_v2_compatible",
     "protocol_param": "",
-    "obfs": "http_post_compatible",
+    "obfs": "tls1.2_ticket_auth_compatible",
     "obfs_param": "",
     "dns_ipv6": false,
-    "connect_verbose_info": 0,
+    "connect_verbose_info": 1,
     "redirect": "",
     "fast_open": false,
     "workers": 1
@@ -244,7 +244,7 @@ function install_ss(){
     cd $cur_dir
     # unzip -q manyuser.zip
     # mv shadowsocks-manyuser/shadowsocks /usr/local/
-	git clone -b manyuser https://github.com/breakwa11/shadowsocks.git /usr/local/shadowsocks
+	git clone https://github.com/shadowsocksr/shadowsocksr.git /usr/local/shadowsocks
     if [ -f /usr/local/shadowsocks/server.py ]; then
         chmod +x /etc/init.d/shadowsocks
         # Add run on system start up
@@ -262,13 +262,10 @@ function install_ss(){
         echo -e "Server IP: \033[41;37m ${IP} \033[0m"
         echo -e "Server Port: \033[41;37m ${shadowsocksport} \033[0m"
         echo -e "Password: \033[41;37m ${shadowsockspwd} \033[0m"
-        echo -e "Local IP: \033[41;37m 127.0.0.1 \033[0m"
-        echo -e "Local Port: \033[41;37m 1080 \033[0m"
-        echo -e "Protocol: \033[41;37m auth_sha1 \033[0m"
-        echo -e "obfs: \033[41;37m http_simple \033[0m"
+        echo -e "Protocol: \033[41;37m auth_sha1_v2 \033[0m"
+        echo -e "obfs: \033[41;37m tls1.2_ticket_auth \033[0m"
         echo -e "Encryption Method: \033[41;37m chacha20 \033[0m"
-        echo
-        echo "Welcome to visit:https://shadowsocks.be/9.html"
+        echo "Welcome to visit:https://www.91yun.org/archives/2079"
         echo "If you want to change protocol & obfs, reference URL:"
         echo "https://github.com/breakwa11/shadowsocks-rss/wiki/Server-Setup"
         echo
@@ -282,11 +279,11 @@ function install_ss(){
 }
 
 #改成北京时间
-function check_datetime(){
-	rm -rf /etc/localtime
-	ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-	ntpdate 1.cn.pool.ntp.org
-}
+# function check_datetime(){
+	# rm -rf /etc/localtime
+	# ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+	# ntpdate time.windows.com
+# }
 
 # Install cleanup
 function install_cleanup(){
@@ -339,7 +336,7 @@ function install_shadowsocks(){
     if [ "$OS" == 'CentOS' ]; then
         firewall_set > /dev/null 2>&1
     fi
-	check_datetime
+	#check_datetime
     install_cleanup
 	
 }
